@@ -1,0 +1,61 @@
+# Configuration file for Synapse.
+#
+# This is a YAML file: see [1] for a quick introduction. Note in particular
+# that *indentation is important*: all the elements of a list or dictionary
+# should have the same indentation.
+#
+# [1] https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
+#
+# For more information on how to configure Synapse, including a complete accounting of
+# each option, go to docs/usage/configuration/config_documentation.md or
+# https://matrix-org.github.io/synapse/latest/usage/configuration/config_documentation.html
+server_name: "banana"
+pid_file: /data/homeserver.pid
+listeners:
+  - port: 8008
+    type: http
+    x_forwarded: true
+    resources:
+      - names: [client, federation]
+        compress: false
+serve_server_wellknown: true
+database:
+  name: sqlite3
+  args:
+    database: /data/homeserver.db
+log_config: "/data/banana.log.config"
+media_store_path: /data/media_store
+registration_shared_secret: "NNWuL9~=pZxi1P4hJYfJ&sJbkNVF4griU&kB0DPuGHw=~c,SrZ"
+report_stats: true
+macaroon_secret_key: "s&+F@df&qnr3Sm;YQMa^KpX5Xd0rthAGTl*9AyBW8kV4^+*uIp"
+form_secret: "Ap7HmI6plEB,uzGv++R-WAkRgyVXGd+CuvngF3f6KUvs7_@9I4"
+signing_key_path: "/data/banana.signing.key"
+trusted_key_servers: []
+enable_registration: true
+enable_registration_without_verification: true
+## Ratelimiting ##
+rc_messages_per_second: 10000
+rc_message_burst_count: 10000
+rc_registration:
+ per_second: 10000
+ burst_count: 10000
+rc_login:
+ address:
+   per_second: 10000
+   burst_count: 10000
+ account:
+   per_second: 10000
+   burst_count: 10000
+ failed_attempts:
+   per_second: 10000
+   burst_count: 10000
+rc_invites:
+  per_room:
+    per_second: 10000
+    burst_count: 10000
+  per_user:
+    per_second: 10000
+    burst_count: 10000
+  per_issuer:
+    per_second: 10000
+    burst_count: 10000

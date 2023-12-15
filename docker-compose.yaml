@@ -1,0 +1,59 @@
+version: '3'
+
+services:
+  synapse:
+    image: matrixdotorg/synapse:latest
+    container_name: synapse
+    environment:
+      - SYNAPSE_SERVER_NAME=banana
+      - SYNAPSE_REPORT_STATS=yes
+    ports:
+      - "8008:8008"
+    volumes:
+      - ./data:/data
+    networks:
+      - matrix_network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./matrix-well-known:/etc/nginx/html/.well-known/matrix/client
+    depends_on:
+      - synapse
+    networks:
+      - matrix_network
+
+  sliding-sync:
+    image: ghcr.io/matrix-org/sliding-sync:latest
+    environment:
+      - SYNCV3_SERVER=http://synapse:8008
+      - SYNCV3_SECRET="33297eaa2e981e794c1b9f174ab4234379540b6b72814e9ac32e8af602fe7d16"
+      - SYNCV3_BINDADDR=0.0.0.0:8009
+      - SYNCV3_DB=user=syncv3 dbname=syncv3 sslmode=disable host=sliding-postgres password=hunter2
+      - SYNCV3_LOG_LEVEL=DEBUG
+    ports:
+      - "8009:8009"
+    depends_on:
+      - sliding-postgres
+      - synapse
+    networks:
+      - matrix_network
+
+  sliding-postgres:
+    image: docker.io/postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      - "POSTGRES_USER=syncv3"
+      - "POSTGRES_PASSWORD=hunter2"
+      - "POSTGRES_DB=syncv3"
+    volumes:
+      - ./sliding_db_data:/var/lib/postgresql/data
+    networks:
+      - matrix_network
+
+networks:
+  matrix_network:

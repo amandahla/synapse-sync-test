@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  synapse:
+    image: matrixdotorg/synapse:latest
+    container_name: synapse
+    environment:
+      - SYNAPSE_SERVER_NAME=banana
+      - SYNAPSE_REPORT_STATS=yes
+    ports:
+      - "8008:8008"
+    volumes:
+      - ./data:/data
+    networks:
+      - matrix_network
+
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - synapse
+    networks:
+      - matrix_network
+
+networks:
+  matrix_network:
